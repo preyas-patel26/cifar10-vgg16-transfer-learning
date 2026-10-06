@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CIFAR-10 AI Vision — VGG16 Deep Learning Classifier</title>
+  <meta name="description" content="Interactive Web Application for CIFAR-10 Image Classification using VGG16 Transfer Learning. GTU 5th Sem Data Science Project.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Ambient Gradient Background Orbs -->
+  <div class="ambient-glow orb-1"></div>
+  <div class="ambient-glow orb-2"></div>
+  <div class="ambient-glow orb-3"></div>
+
+  <!-- Main Container -->
+  <div class="app-container">
+    <!-- Navbar / Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo-badge">
+          <span class="logo-icon">👁️</span>
+          <div>
+            <h1 class="app-title">CIFAR-10 <span class="gradient-text">AI Vision</span></h1>
+            <p class="app-subtitle">VGG16 Transfer Learning • GTU 5th Sem Data Science Project</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="status-chip">
+          <span class="pulse-dot"></span>
+          <span class="status-label">Model Ready</span>
+          <span class="accuracy-badge">79.5% Val Acc</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs" role="tablist">
+      <button class="tab-btn active" id="tab-classifier" onclick="switchTab('classifier')">
+        <span class="tab-icon">⚡</span>
+        <span>Live Classifier</span>
+      </button>
+      <button class="tab-btn" id="tab-visualizations" onclick="switchTab('visualizations')">
+        <span class="tab-icon">📊</span>
+        <span>Evaluation & Graphs</span>
+      </button>
+      <button class="tab-btn" id="tab-architecture" onclick="switchTab('architecture')">
+        <span class="tab-icon">🧠</span>
+        <span>Architecture & Specs</span>
+      </button>
+    </nav>
+
+    <!-- TAB 1: Live Classifier -->
+    <section id="view-classifier" class="tab-content active">
+      <div class="classifier-grid">
+        <!-- Left Column: Input & Upload -->
+        <div class="card upload-card">
+          <div class="card-header">
+            <h2 class="card-title"><span class="title-icon">📤</span> Input Image</h2>
+            <span class="card-tag">Supports PNG, JPG, WebP</span>
+          </div>
+
+          <!-- Drag and Drop Zone -->
+          <div class="dropzone" id="dropzone">
+            <input type="file" id="file-input" accept="image/*" class="file-input-hidden">
+            <div class="dropzone-content">
+              <div class="upload-art">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+              </div>
+              <p class="dropzone-main-text">Drag & drop your image here</p>
+              <p class="dropzone-sub-text">or <button type="button" class="browse-link" onclick="document.getElementById('file-input').click()">browse from your computer</button></p>
+              <span class="tip-badge">Tip: You can also paste an image from clipboard (Ctrl+V)</span>
+            </div>
+          </div>
+
+          <!-- Quick Test Samples Strip -->
+          <div class="samples-section">
+            <div class="samples-header">
+              <span class="samples-title">⚡ Quick Test Samples (CIFAR-10)</span>
+              <span class="samples-hint">Click any to classify instantly</span>
+            </div>
+            <div class="samples-row" id="samples-container">
+              <!-- Dynamically populated or static sample chips -->
+              <button class="sample-chip" onclick="loadSample('airplane')">
+                <img src="/static/samples/airplane.png" alt="Airplane">
+                <span>Airplane</span>
+              </button>
+              <button class="sample-chip" onclick="loadSample('automobile')">
+                <img src="/static/samples/automobile.png" alt="Automobile">
+                <span>Car</span>
+              </button>
+              <button class="sample-chip" onclick="loadSample('bird')">
+                <img src="/static/samples/bird.png" alt="Bird">
+                <span>Bird</span>
+              </button>
+              <button class="sample-chip" onclick="loadSample('cat')">
+                <img src="/static/samples/cat.png" alt="Cat">
+                <span>Cat</span>
+              </button>
+              <button class="sample-chip" onclick="loadSample('deer')">
+                <img src="/static/samples/deer.png" alt="Deer">
+                <span>Deer</span>
+              </button>
+              <button class="sample-chip" onclick="loadSample('dog')">
+                <img src="/static/samples/dog.png" alt="Dog">
+                <span>Dog</span>
+              </button>
+              <button class="sample-chip" onclick="loadSample('frog')">
+                <img src="/static/samples/frog.png" alt="Frog">
+                <span>Frog</span>
+              </button>
+              <button class="sample-chip" onclick="loadSample('horse')">
+                <img src="/static/samples/horse.png" alt="Horse">
+                <span>Horse</span>
+              </button>
+              <button class="sample-chip" onclick="loadSample('ship')">
+                <img src="/static/samples/ship.png" alt="Ship">
+                <span>Ship</span>
+              </button>
+              <button class="sample-chip" onclick="loadSample('truck')">
+                <img src="/static/samples/truck.png" alt="Truck">
+                <span>Truck</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Prediction Results -->
+        <div class="card results-card" id="results-card">
+          <div class="card-header">
+            <h2 class="card-title"><span class="title-icon">🎯</span> Classification Result</h2>
+            <span class="latency-tag" id="latency-tag" style="display: none;">⚡ <span id="latency-ms">0</span> ms</span>
+          </div>
+
+          <!-- Empty State (When no image is chosen) -->
+          <div class="results-empty" id="results-empty">
+            <div class="empty-icon">🖼️</div>
+            <h3>No Image Selected</h3>
+            <p>Upload an image or choose one of the quick test samples on the left to see live predictions.</p>
+          </div>
+
+          <!-- Active Prediction State -->
+          <div class="results-active" id="results-active" style="display: none;">
+            <!-- Top Summary Card -->
+            <div class="prediction-hero">
+              <div class="image-preview-wrapper">
+                <img id="preview-image" src="" alt="Preview">
+                <span class="preview-resolution-badge">32×32 CIFAR Input</span>
+              </div>
+              <div class="prediction-info">
+                <span class="pred-label-pre">Predicted Class</span>
+                <div class="pred-class-row">
+                  <span class="pred-icon" id="pred-icon">🚗</span>
+                  <span class="pred-name" id="pred-class">Automobile</span>
+                </div>
+                <div class="confidence-pill" id="confidence-pill">
+                  <span class="confidence-val" id="pred-confidence">95.4%</span>
+                  <span class="confidence-text">Confidence</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Complete Class Probabilities -->
+            <div class="probability-breakdown">
+              <h3 class="breakdown-title">All 10 Class Probabilities</h3>
+              <div class="probabilities-list" id="probabilities-list">
+                <!-- Dynamically populated bars -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Loading Spinner Overlay -->
+          <div class="loading-overlay" id="loading-overlay" style="display: none;">
+            <div class="spinner"></div>
+            <p class="loading-text">Running VGG16 Inference...</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: Visualizations & Evaluation -->
+    <section id="view-visualizations" class="tab-content" style="display: none;">
+      <!-- Metrics Overview Ribbon -->
+      <div class="metrics-ribbon">
+        <div class="metric-card">
+          <span class="metric-title">Validation Accuracy</span>
+          <span class="metric-value accent-green">79.46%</span>
+          <span class="metric-desc">Top-1 Accuracy on 5,000 Val set</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Training Accuracy</span>
+          <span class="metric-value accent-blue">75.72%</span>
+          <span class="metric-desc">Across 45,000 Augmented images</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Total Epochs</span>
+          <span class="metric-value accent-purple">20</span>
+          <span class="metric-desc">With Early Stopping & ReduceLROnPlateau</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-title">Model Backbone</span>
+          <span class="metric-value accent-orange">VGG16</span>
+          <span class="metric-desc">Pre-trained ImageNet Feature Extractor</span>
+        </div>
+      </div>
+
+      <!-- Graphs Gallery Grid -->
+      <div class="charts-gallery">
+        <!-- Chart 1: Training History -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <div>
+              <h3 class="chart-title">📈 Training & Validation Curves</h3>
+              <p class="chart-subtitle">Accuracy and Loss progression over 20 training epochs</p>
+            </div>
+            <button class="zoom-btn" onclick="openModal('/results/training_history.png', 'Training & Validation History')">🔍 Full View</button>
+          </div>
+          <div class="chart-img-container">
+            <img src="/results/training_history.png" alt="Training History" class="chart-img" loading="lazy">
+          </div>
+        </div>
+
+        <!-- Chart 2: Confusion Matrix -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <div>
+              <h3 class="chart-title">🎯 Confusion Matrix (10×10)</h3>
+              <p class="chart-subtitle">Detailed true vs. predicted counts across all test classes</p>
+            </div>
+            <button class="zoom-btn" onclick="openModal('/results/confusion_matrix.png', 'Confusion Matrix')">🔍 Full View</button>
+          </div>
+          <div class="chart-img-container">
+            <img src="/results/confusion_matrix.png" alt="Confusion Matrix" class="chart-img" loading="lazy">
+          </div>
+        </div>
+
+        <!-- Chart 3: Feature Maps -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <div>
+              <h3 class="chart-title">🔬 VGG16 Layer Feature Maps</h3>
+              <p class="chart-subtitle">Visual activations inside block1_conv2, block3_conv3, and block5_conv3</p>
+            </div>
+            <button class="zoom-btn" onclick="openModal('/results/feature_maps.png', 'VGG16 Feature Maps')">🔍 Full View</button>
+          </div>
+          <div class="chart-img-container">
+            <img src="/results/feature_maps.png" alt="Feature Maps" class="chart-img" loading="lazy">
+          </div>
+        </div>
+
+        <!-- Chart 4: Sample Predictions -->
+        <div class="chart-box">
+          <div class="chart-header">
+            <div>
+              <h3 class="chart-title">🖼️ Sample Test Predictions</h3>
+              <p class="chart-subtitle">15 randomly sampled test predictions with confidence levels</p>
+            </div>
+            <button class="zoom-btn" onclick="openModal('/results/sample_predictions.png', 'Sample Predictions')">🔍 Full View</button>
+          </div>
+          <div class="chart-img-container">
+            <img src="/results/sample_predictions.png" alt="Sample Predictions" class="chart-img" loading="lazy">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: Model Architecture & Specs -->
+    <section id="view-architecture" class="tab-content" style="display: none;">
+      <div class="arch-container">
+        <!-- Architecture Pipeline Visual -->
+        <div class="card arch-pipeline-card">
+          <div class="card-header">
+            <h2 class="card-title"><span class="title-icon">⚙️</span> Deep Learning Pipeline Flow</h2>
+          </div>
+          <div class="pipeline-diagram">
+            <div class="pipe-node">
+              <span class="node-badge">Input</span>
+              <span class="node-title">CIFAR-10 Images</span>
+              <span class="node-shape">32 × 32 × 3</span>
+            </div>
+            <div class="pipe-arrow">➜</div>
+            <div class="pipe-node">
+              <span class="node-badge">Preprocessing</span>
+              <span class="node-title">Resizing Layer</span>
+              <span class="node-shape">64 × 64 × 3</span>
+            </div>
+            <div class="pipe-arrow">➜</div>
+            <div class="pipe-node">
+              <span class="node-badge">Augmentation</span>
+              <span class="node-title">RandomFlip / Rotation / Zoom</span>
+              <span class="node-shape">Training only</span>
+            </div>
+            <div class="pipe-arrow">➜</div>
+            <div class="pipe-node highlight-backbone">
+              <span class="node-badge">Backbone</span>
+              <span class="node-title">Frozen VGG16 (ImageNet)</span>
+              <span class="node-shape">14,714,688 weights</span>
+            </div>
+            <div class="pipe-arrow">➜</div>
+            <div class="pipe-node">
+              <span class="node-badge">Pooling</span>
+              <span class="node-title">GlobalAvgPool 2D</span>
+              <span class="node-shape">512 dimensions</span>
+            </div>
+            <div class="pipe-arrow">➜</div>
+            <div class="pipe-node highlight-head">
+              <span class="node-badge">Dense Head</span>
+              <span class="node-title">Dense(256) + BatchNorm + Dropout(0.5)</span>
+              <span class="node-title">Dense(128) + Dropout(0.3)</span>
+              <span class="node-shape">Softmax (10 classes)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Specifications Table & Parameters -->
+        <div class="specs-grid">
+          <div class="card spec-card">
+            <div class="card-header">
+              <h3 class="card-title">📊 Parameter Breakdown</h3>
+            </div>
+            <table class="specs-table">
+              <tr>
+                <td>Total Parameters</td>
+                <td class="bold">15,143,114</td>
+              </tr>
+              <tr>
+                <td>Frozen Parameters (VGG16)</td>
+                <td class="bold accent-blue">14,714,688 (97.2%)</td>
+              </tr>
+              <tr>
+                <td>Trainable Parameters (Custom Head)</td>
+                <td class="bold accent-green">428,426 (2.8%)</td>
+              </tr>
+              <tr>
+                <td>Model Size on Disk</td>
+                <td class="bold">~58 MB</td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="card spec-card">
+            <div class="card-header">
+              <h3 class="card-title">🎯 Training Hyperparameters</h3>
+            </div>
+            <table class="specs-table">
+              <tr>
+                <td>Optimizer</td>
+                <td class="bold">Adam (Initial lr = 1e-3)</td>
+              </tr>
+              <tr>
+                <td>Loss Function</td>
+                <td class="bold">Categorical Cross-Entropy</td>
+              </tr>
+              <tr>
+                <td>Batch Size</td>
+                <td class="bold">64</td>
+              </tr>
+              <tr>
+                <td>Callbacks</td>
+                <td class="bold">EarlyStopping(p=5), ReduceLROnPlateau(p=3), ModelCheckpoint</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>GTU 5th Sem Data Science Project #18 • Powered by TensorFlow & VGG16 Transfer Learning</p>
+    </footer>
+  </div>
+
+  <!-- Image Lightbox Modal -->
+  <div class="modal" id="image-modal" onclick="closeModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="modal-title">Graph Viewer</h3>
+        <button class="modal-close-btn" onclick="closeModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <img id="modal-img" src="" alt="Full graph view">
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

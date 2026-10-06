@@ -1,0 +1,6 @@
+{
+  "step_completed": 10,
+  "epochs_trained": 20,
+  "final_train_acc": 0.7572222352027893,
+  "final_val_acc": 0.7946000099182129
+}
